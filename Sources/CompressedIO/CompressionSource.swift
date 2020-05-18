@@ -3,8 +3,43 @@ import IO
 
 struct CompressionError: Error {}
 
+public struct Algorithm: RawRepresentable {
+    public let rawValue: compression_algorithm
+
+    public init(rawValue: compression_algorithm) {
+        self.rawValue = rawValue
+    }
+
+    public static let zlib = Algorithm(rawValue: COMPRESSION_ZLIB)
+}
+
+public enum Operation {
+    case compress
+    case decompress
+}
+
+extension Operation: RawRepresentable {
+    public var rawValue: compression_stream_operation {
+        switch self {
+        case .compress:
+            return COMPRESSION_STREAM_ENCODE
+
+        case .decompress:
+            return COMPRESSION_STREAM_DECODE
+        }
+    }
+
+    public init?(rawValue: compression_stream_operation) {
+        switch (rawValue) {
+        case COMPRESSION_STREAM_ENCODE: self = .compress
+        case COMPRESSION_STREAM_DECODE: self = .decompress
+        default: return nil
+        }
+    }
+}
+
 @available(OSX 10.11, *)
-public class ZlibReader2<Source: BufferedSource >: IO.Source {
+public class CompressionSource<Source: BufferedSource >: IO.Source {
     let source: Source
     var compression: compression_stream
 
@@ -14,12 +49,12 @@ public class ZlibReader2<Source: BufferedSource >: IO.Source {
         compression_stream_destroy(&compression)
     }
 
-    public init(source: Source) throws {
+    public init(source: Source, operation: Operation, algorithm: Algorithm) throws {
         self.source = source
 
-        compression = compression_stream(dst_ptr: UnsafeMutablePointer(bitPattern: 1)!, dst_size: 0, src_ptr: UnsafeMutablePointer(bitPattern: 1)!, src_size: 0, state: nil)
+        compression = compression_stream(dst_ptr: UnsafeMutablePointer(bitPattern: -1)!, dst_size: 0, src_ptr: UnsafeMutablePointer(bitPattern: -1)!, src_size: 0, state: nil)
 
-        guard compression_stream_init(&compression, COMPRESSION_STREAM_DECODE, COMPRESSION_ZLIB) == COMPRESSION_STATUS_OK else {
+        guard compression_stream_init(&compression, operation.rawValue, algorithm.rawValue) == COMPRESSION_STATUS_OK else {
             throw CompressionError()
         }
     }
