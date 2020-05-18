@@ -18,22 +18,14 @@ public enum Operation {
     case decompress
 }
 
-extension Operation: RawRepresentable {
-    public var rawValue: compression_stream_operation {
+extension Operation {
+    var rawValue: compression_stream_operation {
         switch self {
         case .compress:
             return COMPRESSION_STREAM_ENCODE
 
         case .decompress:
             return COMPRESSION_STREAM_DECODE
-        }
-    }
-
-    public init?(rawValue: compression_stream_operation) {
-        switch (rawValue) {
-        case COMPRESSION_STREAM_ENCODE: self = .compress
-        case COMPRESSION_STREAM_DECODE: self = .decompress
-        default: return nil
         }
     }
 }
