@@ -1,6 +1,6 @@
 import Darwin
 
-enum IOError: Error {
+public enum IOError: Error {
     case POSIXError(POSIXErrorCode)
     case unknownError
     case invalidURL

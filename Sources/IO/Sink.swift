@@ -1,3 +1,3 @@
-protocol Sink {
+public protocol Sink {
     func write(buffer: UnsafeRawBufferPointer) throws -> Int
 }

@@ -1,18 +1,18 @@
 import Darwin
 import Foundation
 
-struct FileHandle: Source, Sink {
+public struct FileHandle: Source, Sink {
     let handle: Int32
 
-    static let stdin = FileHandle(handle: STDIN_FILENO)
-    static let stdout = FileHandle(handle: STDOUT_FILENO)
-    static let stderr = FileHandle(handle: STDERR_FILENO)
+    public static let stdin = FileHandle(handle: STDIN_FILENO)
+    public static let stdout = FileHandle(handle: STDOUT_FILENO)
+    public static let stderr = FileHandle(handle: STDERR_FILENO)
 
-    init(handle: Int32) {
+    public init(handle: Int32) {
         self.handle = handle
     }
 
-    init(url: URL, flag: Int32 = O_RDONLY) throws {
+    public init(url: URL, flag: Int32 = O_RDONLY, mode: mode_t = 0o666) throws {
         guard url.isFileURL else {
             throw IOError.invalidURL
         }
@@ -22,7 +22,7 @@ struct FileHandle: Source, Sink {
                 throw IOError.invalidURL
             }
 
-            let handle = open(ptr, flag)
+            let handle = open(ptr, flag, mode)
             guard handle > 0 else {
                 throw IOError.errno
             }
@@ -31,11 +31,11 @@ struct FileHandle: Source, Sink {
         }
     }
 
-    func close() {
+    public func close() {
         Darwin.close(handle)
     }
 
-    func write(buffer: UnsafeRawBufferPointer) throws -> Int {
+    public func write(buffer: UnsafeRawBufferPointer) throws -> Int {
         guard let base = buffer.baseAddress, buffer.count > 0 else {
             return 0
         }
@@ -48,7 +48,7 @@ struct FileHandle: Source, Sink {
         return result
     }
 
-    func read(buffer: UnsafeMutableRawBufferPointer) throws -> Int {
+    public func read(buffer: UnsafeMutableRawBufferPointer) throws -> Int {
         guard let base = buffer.baseAddress, buffer.count > 0 else {
             return 0
         }
@@ -61,7 +61,7 @@ struct FileHandle: Source, Sink {
         return result
     }
 
-    func stat() throws -> stat {
+    public func stat() throws -> stat {
         var result = Darwin.stat()
         guard Darwin.fstat(handle, &result) == 0 else {
             throw IOError.errno
@@ -70,7 +70,7 @@ struct FileHandle: Source, Sink {
         return result
     }
 
-    var isTTY: Bool {
+    public var isTTY: Bool {
         return isatty(handle) == 1
     }
 }

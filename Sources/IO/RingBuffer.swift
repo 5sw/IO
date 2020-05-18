@@ -97,26 +97,26 @@ struct RingBufferImpl {
     }
 }
 
-struct RingBuffer {
-    private let buffer: ManagedBuffer<RingBufferImpl, UInt8>
+public struct RingBuffer {
+    let buffer: ManagedBuffer<RingBufferImpl, UInt8>
 
-    init(capacity: Int) {
+    public init(capacity: Int) {
         buffer = ManagedBuffer.create(minimumCapacity: capacity, makingHeaderWith: RingBufferImpl.init)
     }
 
-    var availableToRead: Int {
+    public var availableToRead: Int {
         return buffer.header.availableToRead
     }
 
-    var availableToWrite: Int {
+    public var availableToWrite: Int {
         return buffer.header.availableToWrite
     }
 
-    func read<T>(_ closure: (UnsafeRawBufferPointer, inout Int) throws -> T) rethrows -> T {
+    public func read<T>(_ closure: (UnsafeRawBufferPointer, inout Int) throws -> T) rethrows -> T {
         return try buffer.header.read(closure)
     }
 
-    func write<T>(_ closure: (UnsafeMutableRawBufferPointer, inout Int) throws -> T) rethrows -> T {
+    public func write<T>(_ closure: (UnsafeMutableRawBufferPointer, inout Int) throws -> T) rethrows -> T {
         return try buffer.header.write(closure)
     }
 }

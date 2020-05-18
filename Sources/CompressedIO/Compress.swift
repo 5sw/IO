@@ -4,7 +4,7 @@ import IO
 struct CompressionError: Error {}
 
 @available(OSX 10.11, *)
-class ZlibReader2<Source: BufferedSource >: IO.Source {
+public class ZlibReader2<Source: BufferedSource >: IO.Source {
     let source: Source
     var compression: compression_stream
 
@@ -14,7 +14,7 @@ class ZlibReader2<Source: BufferedSource >: IO.Source {
         compression_stream_destroy(&compression)
     }
 
-    init(source: Source) throws {
+    public init(source: Source) throws {
         self.source = source
 
         compression = compression_stream(dst_ptr: UnsafeMutablePointer(bitPattern: 1)!, dst_size: 0, src_ptr: UnsafeMutablePointer(bitPattern: 1)!, src_size: 0, state: nil)
@@ -24,7 +24,7 @@ class ZlibReader2<Source: BufferedSource >: IO.Source {
         }
     }
 
-    func read(buffer: UnsafeMutableRawBufferPointer) throws -> Int {
+    public func read(buffer: UnsafeMutableRawBufferPointer) throws -> Int {
         guard !atEnd else { return 0 }
 
         return try source.read { sourceBuffer, sourceUsed in

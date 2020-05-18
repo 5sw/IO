@@ -7,7 +7,7 @@ public protocol BufferedSource: Source {
     func read<T>(_ closure: (UnsafeRawBufferPointer, inout Int) throws -> T) throws -> T
 }
 
-extension BufferedSource {
+public extension BufferedSource {
     func read(buffer: UnsafeMutableRawBufferPointer) throws -> Int {
         guard let base = buffer.baseAddress, buffer.count > 0  else { return 0 }
 
