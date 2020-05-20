@@ -8,7 +8,7 @@ final class RingBufferTests: XCTestCase {
 
         let r = RingBuffer(capacity: minimumCapacity)
         XCTAssertEqual(r.availableToRead, 0)
-        XCTAssertGreaterThan(r.availableToWrite, minimumCapacity)
+        XCTAssertGreaterThanOrEqual(r.availableToWrite, minimumCapacity)
     }
 
     func testCopying() throws {
