@@ -18,6 +18,12 @@ let package = Package(
             dependencies: [
                 .target(name: "IO"),
             ]
-        )
+        ),
+		.testTarget(
+			name: "IOTests",
+			dependencies: [
+				"IO"
+			]
+		)
     ]
 )
