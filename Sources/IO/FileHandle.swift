@@ -1,4 +1,5 @@
-import Darwin
+
+
 import Foundation
 
 public struct FileHandle: Source, Sink {
@@ -32,7 +33,7 @@ public struct FileHandle: Source, Sink {
     }
 
     public func close() {
-        Darwin.close(handle)
+        _ = sys_close(handle)
     }
 
     public func write(buffer: UnsafeRawBufferPointer) throws -> Int {
@@ -40,7 +41,7 @@ public struct FileHandle: Source, Sink {
             return 0
         }
 
-        let result = Darwin.write(handle, base, buffer.count)
+        let result = sys_write(handle, base, buffer.count)
         guard result >= 0 else {
             throw IOError.errno
         }
@@ -53,7 +54,7 @@ public struct FileHandle: Source, Sink {
             return 0
         }
 
-        let result = Darwin.read(handle, base, buffer.count)
+        let result = sys_read(handle, base, buffer.count)
         guard result >= 0 else {
             throw IOError.errno
         }
@@ -62,8 +63,8 @@ public struct FileHandle: Source, Sink {
     }
 
     public func stat() throws -> stat {
-        var result = Darwin.stat()
-        guard Darwin.fstat(handle, &result) == 0 else {
+        var result = IO.stat()
+        guard sys_stat(handle, &result) == 0 else {
             throw IOError.errno
         }
 

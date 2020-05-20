@@ -1,3 +1,5 @@
+#if canImport(Compression)
+
 import Compression
 import IO
 
@@ -76,4 +78,6 @@ public class CompressionSource<Source: BufferedSource >: IO.Source {
         }
     }
 }
+
+#endif
 

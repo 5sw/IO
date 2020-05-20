@@ -1,10 +1,4 @@
-import Darwin
-
 extension stat {
-    var isFifo: Bool {
-        return hasMode(S_IFIFO)
-    }
-
     var isRegular: Bool {
         return hasMode(S_IFREG)
     }

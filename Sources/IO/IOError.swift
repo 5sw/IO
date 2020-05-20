@@ -1,4 +1,4 @@
-import Darwin
+import Foundation
 
 public enum IOError: Error {
     case POSIXError(POSIXErrorCode)
@@ -6,7 +6,7 @@ public enum IOError: Error {
     case invalidURL
 
     static var errno: IOError {
-        if let err = POSIXErrorCode(rawValue: Darwin.errno) {
+        if let err = POSIXErrorCode(rawValue: sys_errno) {
             return .POSIXError(err)
         } else {
             return .unknownError
