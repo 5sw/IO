@@ -1,3 +1,5 @@
+import Foundation
+
 extension stat {
     var isRegular: Bool {
         return hasMode(S_IFREG)
