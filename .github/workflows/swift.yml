@@ -8,19 +8,17 @@ on:
 
 jobs:
   build:
-
 	name: Swift ${{ matrix.swift }} on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
-	strategy:
-		matrix:
-			os: [ubuntu-latest, macos-latest]
-			swift: ["5"]
-
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+        swift: ["5"]
     steps:
-	- uses: fwal/setup-swift@v1
-	  with:
-	  	swift-version: ${{ matrix.swift }}
     - uses: actions/checkout@v2
+	- uses: fwal/setup-swift@v1
+      with:
+        swift-version: ${{ matrix.swift }}
     - name: Build
       run: swift build -v
 #    - name: Run tests
