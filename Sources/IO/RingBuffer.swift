@@ -142,6 +142,32 @@ struct RingBufferImpl {
 
         return r
     }
+
+    @usableFromInline
+    mutating func write(buffer: UnsafeRawBufferPointer) -> Int {
+        guard var base = buffer.baseAddress, buffer.count > 0  else { return 0 }
+        var toWrite = buffer.count
+
+        func writeBlock() -> Int {
+            return write { destination, copied in
+                guard let destinationAddress = destination.baseAddress, destination.count > 0 else {
+                    return 0
+                }
+
+                copied = min(destination.count, toWrite)
+                destinationAddress.copyMemory(from: base, byteCount: copied)
+                return copied
+            }
+        }
+
+        var written = writeBlock()
+        toWrite -= written
+        base += written
+
+        written += writeBlock()
+
+        return written
+    }
 }
 
 public struct RingBuffer: BufferedSource, BufferedSink {
@@ -212,5 +238,10 @@ public struct RingBuffer: BufferedSource, BufferedSink {
     @inlinable
     public func write<T>(_ closure: (UnsafeMutableRawBufferPointer, inout Int) throws -> T) rethrows -> T {
         return try buffer.header.write(closure)
+    }
+
+    @inlinable
+    public func write(buffer: UnsafeRawBufferPointer) throws -> Int {
+        return self.buffer.header.write(buffer: buffer)
     }
 }
