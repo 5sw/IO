@@ -138,6 +138,24 @@ public struct RingBuffer: BufferedSource, BufferedSink {
         buffer = ManagedBuffer.create(minimumCapacity: capacity, makingHeaderWith: RingBufferImpl.init)
     }
 
+    public init(_ copy: RingBuffer) {
+        self.init(copy: copy.buffer.header)
+    }
+
+    init(copy buffer: RingBufferImpl, grow: Bool = false) {
+        var newCapacity = buffer.capacity
+        if grow {
+            newCapacity += buffer.capacity / 2 + buffer.capacity / 4
+        }
+
+        self.buffer = ManagedBuffer.create(minimumCapacity: newCapacity, makingHeaderWith: RingBufferImpl.init)
+
+        var temp = buffer
+        write { ptr, copied in
+            copied = temp.read(buffer: ptr)
+        }
+    }
+
     @inlinable
     public var availableToRead: Int {
         return buffer.header.availableToRead
