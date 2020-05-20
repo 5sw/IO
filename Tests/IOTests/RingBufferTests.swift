@@ -41,9 +41,13 @@ final class RingBufferTests: XCTestCase {
         var buffer = RingBuffer(capacity: 10)
         try buffer.write(Data([1, 2, 42, 5]))
 
+        weak var oldObject = buffer.buffer
+
         let oldCapacity = buffer.capacity
 
         buffer.grow()
+
+        XCTAssertNil(oldObject)
 
         XCTAssertGreaterThan(buffer.capacity, oldCapacity)
 
