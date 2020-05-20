@@ -45,6 +45,7 @@ struct RingBufferImpl {
         }
     }
 
+    /// Continuous space available for writing
     @usableFromInline
     var availableToWrite: Int {
         if writePointer < readPointer {
@@ -53,6 +54,19 @@ struct RingBufferImpl {
             return 0
         } else {
             return end - writePointer
+        }
+    }
+
+    /// Total free space for writing.
+    ///
+    /// Might need two write operations to fill completely.
+    var freeSpace: Int {
+        if writePointer < readPointer {
+            return readPointer - writePointer
+        } else if readPointer == writePointer && !empty {
+            return 0
+        } else {
+            return capacity - (writePointer - readPointer)
         }
     }
 
@@ -139,15 +153,10 @@ public struct RingBuffer: BufferedSource, BufferedSink {
     }
 
     public init(_ copy: RingBuffer) {
-        self.init(copy: copy.buffer.header)
+        self.init(copy: copy.buffer.header, newCapacity: copy.capacity)
     }
 
-    init(copy buffer: RingBufferImpl, grow: Bool = false) {
-        var newCapacity = buffer.capacity
-        if grow {
-            newCapacity += buffer.capacity / 2 + buffer.capacity / 4
-        }
-
+    init(copy buffer: RingBufferImpl, newCapacity: Int) {
         self.buffer = ManagedBuffer.create(minimumCapacity: newCapacity, makingHeaderWith: RingBufferImpl.init)
 
         var temp = buffer
@@ -156,8 +165,23 @@ public struct RingBuffer: BufferedSource, BufferedSink {
         }
     }
 
-    mutating func grow() {
-        self = RingBuffer(copy: buffer.header, grow: true)
+    public mutating func grow() {
+        let newCapacity = capacity + capacity / 2 + capacity / 4
+        self = RingBuffer(copy: buffer.header, newCapacity: newCapacity)
+    }
+
+    /// Ensure that at least `requiredSpace` bytes can be written.
+    ///
+    /// Does not guarantee that the space is contiguous, so two writes might be needed.
+    ///
+    /// - parameter requiredSpace: Needed space
+    public mutating func ensureSpace(_ requiredSpace: Int) {
+        let needed = requiredSpace - buffer.header.freeSpace
+        guard needed > 0 else {
+            return
+        }
+
+        self = RingBuffer(copy: buffer.header, newCapacity: capacity + needed)
     }
 
     @inlinable
