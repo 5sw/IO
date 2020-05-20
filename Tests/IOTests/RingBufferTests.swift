@@ -13,7 +13,7 @@ final class RingBufferTests: XCTestCase {
 
     func testCopying() throws {
         let first = RingBuffer(capacity: 10)
-        try first.write(Data([1, 2, 42, 5]))
+        try first.write([1, 2, 42, 5])
 
         let second = RingBuffer(first)
 
@@ -39,7 +39,7 @@ final class RingBufferTests: XCTestCase {
 
     func testGrowing() throws {
         var buffer = RingBuffer(capacity: 10)
-        try buffer.write(Data([1, 2, 42, 5]))
+        try buffer.write([1, 2, 42, 5])
 
         weak var oldObject = buffer.buffer
 

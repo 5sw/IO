@@ -6,10 +6,14 @@ public protocol Sink {
 
 public extension Sink {
     @discardableResult
-    func write(_ data: Data) throws -> Int {
-        return try data.withUnsafeBytes {
-            try self.write(buffer: $0)
+    func write<D: DataProtocol>(_ data: D) throws -> Int {
+        var written = 0
+        for region in data.regions {
+            written += try region.withUnsafeBytes { (ptr) in
+                try self.write(buffer: ptr)
+            }
         }
+        return written
     }
 }
 
