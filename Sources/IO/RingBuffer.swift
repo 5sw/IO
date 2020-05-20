@@ -241,7 +241,7 @@ public struct RingBuffer: BufferedSource, BufferedSink {
     }
 
     @inlinable
-    public func write(buffer: UnsafeRawBufferPointer) throws -> Int {
+    public func write(buffer: UnsafeRawBufferPointer) -> Int {
         return self.buffer.header.write(buffer: buffer)
     }
 }
