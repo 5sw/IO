@@ -130,7 +130,7 @@ struct RingBufferImpl {
     }
 }
 
-public struct RingBuffer: BufferedSource {
+public struct RingBuffer: BufferedSource, BufferedSink {
     @usableFromInline
     let buffer: ManagedBuffer<RingBufferImpl, UInt8>
 
