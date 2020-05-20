@@ -37,8 +37,26 @@ final class RingBufferTests: XCTestCase {
         XCTAssertEqual(second.availableToRead, 0)
     }
 
+    func testGrowing() throws {
+        var buffer = RingBuffer(capacity: 10)
+        try buffer.write(Data([1, 2, 42, 5]))
+
+        let oldCapacity = buffer.capacity
+
+        buffer.grow()
+
+        XCTAssertGreaterThan(buffer.capacity, oldCapacity)
+
+        let testBuffer = UnsafeMutableRawBufferPointer.allocate(byteCount: buffer.capacity, alignment: 0)
+        defer { testBuffer.deallocate() }
+
+        let read = buffer.read(buffer: testBuffer)
+        XCTAssertTrue(testBuffer.prefix(read).elementsEqual([1, 2, 42, 5]))
+    }
+
     static var allTests = [
         ("testNewRingBufferIsEmpty", testNewRingBufferIsEmpty),
-        ("testCopying", testCopying)
+        ("testCopying", testCopying),
+        ("testGrowing", testGrowing),
     ]
 }

@@ -156,6 +156,15 @@ public struct RingBuffer: BufferedSource, BufferedSink {
         }
     }
 
+    mutating func grow() {
+        self = RingBuffer(copy: buffer.header, grow: true)
+    }
+
+    @inlinable
+    public var capacity: Int {
+        buffer.header.capacity
+    }
+
     @inlinable
     public var availableToRead: Int {
         return buffer.header.availableToRead
