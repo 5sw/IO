@@ -95,9 +95,35 @@ struct RingBufferImpl {
 
         return result
     }
+
+    mutating func read(buffer: UnsafeMutableRawBufferPointer) -> Int {
+        guard var base = buffer.baseAddress, buffer.count > 0  else { return 0 }
+
+        var toRead = buffer.count
+
+        func readBlock() -> Int {
+            return read { source, copied in
+                guard let sourceAddress = source.baseAddress, source.count > 0 else {
+                    return 0
+                }
+
+                copied = min(source.count, toRead)
+                base.copyMemory(from: sourceAddress, byteCount: copied)
+                return copied
+            }
+        }
+
+        var r = readBlock()
+        toRead -= r
+        base += r
+
+        r += readBlock()
+
+        return r
+    }
 }
 
-public struct RingBuffer {
+public struct RingBuffer: BufferedSource {
     let buffer: ManagedBuffer<RingBufferImpl, UInt8>
 
     public init(capacity: Int) {
@@ -114,6 +140,10 @@ public struct RingBuffer {
 
     public func read<T>(_ closure: (UnsafeRawBufferPointer, inout Int) throws -> T) rethrows -> T {
         return try buffer.header.read(closure)
+    }
+
+    public func read(buffer: UnsafeMutableRawBufferPointer) -> Int {
+        return self.buffer.header.read(buffer: buffer)
     }
 
     public func write<T>(_ closure: (UnsafeMutableRawBufferPointer, inout Int) throws -> T) rethrows -> T {
