@@ -1,3 +1,4 @@
+@usableFromInline
 struct RingBufferImpl {
     let start: UnsafeMutableRawPointer
     let end: UnsafeMutableRawPointer
@@ -33,6 +34,7 @@ struct RingBufferImpl {
         self.init(start: ptr, capacity: managedBuffer.capacity)
     }
 
+    @usableFromInline
     var availableToRead: Int {
         if readPointer < writePointer {
             return writePointer - readPointer
@@ -43,6 +45,7 @@ struct RingBufferImpl {
         }
     }
 
+    @usableFromInline
     var availableToWrite: Int {
         if writePointer < readPointer {
             return readPointer - writePointer
@@ -53,10 +56,12 @@ struct RingBufferImpl {
         }
     }
 
+    @usableFromInline
     var capacity: Int {
         return end - start
     }
 
+    @usableFromInline
     mutating func read<T>(_ closure: (UnsafeRawBufferPointer, inout Int) throws -> T) rethrows -> T {
         let ptr = UnsafeRawBufferPointer(start: UnsafeRawPointer(readPointer), count: availableToRead)
 
@@ -77,6 +82,7 @@ struct RingBufferImpl {
         return result
     }
 
+    @usableFromInline
     mutating func write<T>(_ closure: (UnsafeMutableRawBufferPointer, inout Int) throws -> T) rethrows -> T {
         let ptr = UnsafeMutableRawBufferPointer(start: writePointer, count: availableToWrite)
         var actualWritten = 0
@@ -96,6 +102,7 @@ struct RingBufferImpl {
         return result
     }
 
+    @usableFromInline
     mutating func read(buffer: UnsafeMutableRawBufferPointer) -> Int {
         guard var base = buffer.baseAddress, buffer.count > 0  else { return 0 }
 
@@ -124,28 +131,34 @@ struct RingBufferImpl {
 }
 
 public struct RingBuffer: BufferedSource {
+    @usableFromInline
     let buffer: ManagedBuffer<RingBufferImpl, UInt8>
 
     public init(capacity: Int) {
         buffer = ManagedBuffer.create(minimumCapacity: capacity, makingHeaderWith: RingBufferImpl.init)
     }
 
+    @inlinable
     public var availableToRead: Int {
         return buffer.header.availableToRead
     }
 
+    @inlinable
     public var availableToWrite: Int {
         return buffer.header.availableToWrite
     }
 
+    @inlinable
     public func read<T>(_ closure: (UnsafeRawBufferPointer, inout Int) throws -> T) rethrows -> T {
         return try buffer.header.read(closure)
     }
 
+    @inlinable
     public func read(buffer: UnsafeMutableRawBufferPointer) -> Int {
         return self.buffer.header.read(buffer: buffer)
     }
 
+    @inlinable
     public func write<T>(_ closure: (UnsafeMutableRawBufferPointer, inout Int) throws -> T) rethrows -> T {
         return try buffer.header.write(closure)
     }
